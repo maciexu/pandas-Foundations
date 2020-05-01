@@ -157,14 +157,58 @@ differences = np.abs(ts1- ts2_interp)
 print(differences.describe())
 
 
+"""
+Time zones and conversion
+Time zone handling with pandas typically assumes that you are handling the Index of the Series. 
+In this exercise, you will learn how to handle timezones that are associated with datetimes in the column data, 
+and not just the Index.
 
-# Time zones and conversion
+You will work with the flight departure dataset again, and this time you will select Los Angeles ('LAX') as the destination airport.
+
+Here we will use a mask to ensure that we only compute on data we actually want. 
+To learn more about Boolean masks, click here!
+https://docs.scipy.org/doc/numpy/reference/maskedarray.generic.html
+"""
+# Build a Boolean mask to filter for the 'LAX' departure flights: mask
+mask = df['Destination Airport'] == 'LAX'
+
+# Use the mask to subset the data: la
+la = df[mask]
+
+# Combine two columns of data to create a datetime series: times_tz_none 
+times_tz_none = pd.to_datetime( la['Date (MM/DD/YYYY)'] + ' ' + la['Wheels-off Time'])
+
+# Localize the time to US/Central: times_tz_central
+times_tz_central = times_tz_none.dt.tz_localize('US/Central')
+
+# Convert the datetimes from US/Central to US/Pacific
+times_tz_pacific = times_tz_central.dt.tz_convert('US/Pacific')
 
 
+# Plotting time series, datetime indexing
+# Convert the 'Date' column into a collection of datetime objects: df.Date
+df.Date = pd.to_datetime(df.Date)
 
+# Set the index to be the converted 'Date' column
+df.set_index('Date', inplace=True)
 
+# Re-plot the DataFrame to see that the axis is now datetime aware!
+df.plot()
+plt.show()
 
+"""
+Plotting date ranges, partial indexing
+how to extract one month of temperature data using 'May 2010' as a key into df.Temperature[], 
+and call head() to inspect the result: 
+df.Temperature['May 2010'].head()
+"""
+# Plot the summer data
+df.Temperature['Jun 2010':'Aug 2010'].plot()
+plt.show()
+plt.clf()
 
-
-
+# Plot the one week data
+df.Temperature['2010-06-10':'2010-06-17'].plot()
+plt.show()
+plt.clf()
 
